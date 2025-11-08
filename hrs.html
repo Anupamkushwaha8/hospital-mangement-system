@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hospital Management Record System - Full (HTML/CSS/JS)</title>
+  <style>
+    :root{--bg:#f6f8fb;--card:#ffffff;--accent:#0f62fe;--muted:#6b7280;--danger:#ef4444}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:#0f172a}
+    header{background:linear-gradient(90deg,#ffffff 0%, #f8fafc 60%);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #e6e9ee}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{height:44px;width:44px;background:linear-gradient(135deg,var(--accent),#6ee7b7);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .title{font-weight:700;font-size:18px}
+    .subtitle{font-size:13px;color:var(--muted)}
+    .container{display:flex;gap:18px;padding:18px;align-items:flex-start}
+    nav{width:240px}
+    .nav-card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,0.03)}
+    nav button{display:block;width:100%;text-align:left;padding:10px;border:0;background:transparent;border-radius:8px;margin-bottom:6px;cursor:pointer}
+    nav button.active{background:rgba(15,98,254,0.08);color:var(--accent);font-weight:600}
+    main{flex:1}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,0.03);margin-bottom:14px}
+    .grid{display:grid;gap:12px}
+    .columns-3{grid-template-columns:repeat(3,1fr)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left}
+    th{color:var(--muted);font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.primary{background:var(--accent);color:white}
+    .btn.ghost{background:transparent;border:1px solid #e6e7ea}
+    .actions{display:flex;gap:8px}
+    input,select,textarea{padding:8px;border-radius:8px;border:1px solid #e6e7ea;background:#fff;min-width:0}
+    form .row{display:flex;gap:8px}
+    .right{display:flex;gap:8px;align-items:center}
+    .small{font-size:13px}
+    .danger{color:var(--danger)}
+    footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:980px){.container{flex-direction:column;padding:12px}nav{width:100%}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">H</div>
+      <div>
+        <div class="title">Hospital Management Record System</div>
+        <div class="subtitle">Full demo • Frontend-only (localStorage) • B.Tech friendly</div>
+      </div>
+    </div>
+    <div class="right">
+      <button class="btn ghost" onclick="loadSample()">Load Sample Data</button>
+      <button class="btn" onclick="clearAll()">Clear All</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <nav>
+      <div class="nav-card">
+        <button id="nav-dashboard" class="active" onclick="show('dashboard')">Dashboard</button>
+        <button id="nav-patients" onclick="show('patients')">Patients</button>
+        <button id="nav-doctors" onclick="show('doctors')">Doctors</button>
+        <button id="nav-appointments" onclick="show('appointments')">Appointments</button>
+        <button id="nav-reports" onclick="show('reports')">Reports</button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- Dashboard -->
+      <section id="dashboard" class="card">
+        <h2>Dashboard</h2>
+        <p class="muted">Quick stats</p>
+        <div class="grid columns-3" style="margin-top:12px">
+          <div class="card"><div class="muted">Total Patients</div><div id="statPatients" style="font-size:28px;font-weight:700">0</div></div>
+          <div class="card"><div class="muted">Total Doctors</div><div id="statDoctors" style="font-size:28px;font-weight:700">0</div></div>
+          <div class="card"><div class="muted">Upcoming Appointments</div><div id="statAppts" style="font-size:28px;font-weight:700">0</div></div>
+        </div>
+      </section>
+
+      <!-- Patients -->
+      <section id="patients" class="card" style="display:none">
+        <h2>Patients</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0">
+          <div class="muted">Create, view, edit and delete patient records</div>
+          <div class="actions"><button class="btn ghost" onclick="exportPatientsCSV()">Export CSV</button><button class="btn primary" onclick="openForm('patient')">+ New Patient</button></div>
+        </div>
+
+        <div id="patientForm" class="card" style="display:none">
+          <h3 id="patientFormTitle">New Patient</h3>
+          <form onsubmit="savePatient(event)">
+            <input type="hidden" id="patientId">
+            <div class="row" style="margin-bottom:8px">
+              <div style="flex:1"><label class="small">Name</label><input id="patientName" required></div>
+              <div style="width:120px"><label class="small">Age</label><input id="patientAge" type="number" min="0" required></div>
+            </div>
+            <div class="row" style="margin-bottom:8px">
+              <div style="flex:1"><label class="small">Gender</label><select id="patientGender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+              <div style="flex:1"><label class="small">Contact</label><input id="patientContact" pattern="[0-9\s+-]{7,20}"></div>
+            </div>
+            <div style="margin-bottom:8px"><label class="small">Address</label><input id="patientAddress"></div>
+            <div style="margin-bottom:8px"><label class="small">Medical Notes</label><textarea id="patientNotes" rows="2"></textarea></div>
+            <div style="display:flex;gap:8px"><button class="btn primary" type="submit">Save</button><button class="btn ghost" type="button" onclick="closeForm('patient')">Cancel</button></div>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <input id="patientSearch" placeholder="Search patients by name or contact" oninput="renderPatients()" style="width:60%">
+            <div class="muted small">Total: <span id="patientCount">0</span></div>
+          </div>
+          <table id="patientTable">
+            <thead><tr><th>Name</th><th>Age</th><th>Gender</th><th>Contact</th><th>Address</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Doctors -->
+      <section id="doctors" class="card" style="display:none">
+        <h2>Doctors</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0">
+          <div class="muted">Manage doctors / specialists</div>
+          <div class="actions"><button class="btn primary" onclick="openForm('doctor')">+ New Doctor</button></div>
+        </div>
+
+        <div id="doctorForm" class="card" style="display:none">
+          <h3 id="doctorFormTitle">New Doctor</h3>
+          <form onsubmit="saveDoctor(event)">
+            <input type="hidden" id="doctorId">
+            <div class="row" style="margin-bottom:8px">
+              <div style="flex:1"><label class="small">Name</label><input id="doctorName" required></div>
+              <div style="width:180px"><label class="small">Specialty</label><input id="doctorSpecialty" required></div>
+            </div>
+            <div style="margin-bottom:8px"><label class="small">Contact</label><input id="doctorContact"></div>
+            <div style="display:flex;gap:8px"><button class="btn primary" type="submit">Save</button><button class="btn ghost" type="button" onclick="closeForm('doctor')">Cancel</button></div>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <table id="doctorTable">
+            <thead><tr><th>Name</th><th>Specialty</th><th>Contact</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Appointments -->
+      <section id="appointments" class="card" style="display:none">
+        <h2>Appointments</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0">
+          <div class="muted">Schedule and manage appointments</div>
+          <div class="actions"><button class="btn primary" onclick="openForm('appointment')">+ New Appointment</button></div>
+        </div>
+
+        <div id="appointmentForm" class="card" style="display:none">
+          <h3 id="appointmentFormTitle">New Appointment</h3>
+          <form onsubmit="saveAppointment(event)">
+            <input type="hidden" id="appointmentId">
+            <div class="row" style="margin-bottom:8px">
+              <div style="flex:1"><label class="small">Patient</label><select id="appointmentPatient" required></select></div>
+              <div style="flex:1"><label class="small">Doctor</label><select id="appointmentDoctor" required></select></div>
+            </div>
+            <div class="row" style="margin-bottom:8px">
+              <div style="flex:1"><label class="small">Date & Time</label><input id="appointmentDatetime" type="datetime-local" required></div>
+              <div style="flex:1"><label class="small">Reason</label><input id="appointmentReason"></div>
+            </div>
+            <div style="display:flex;gap:8px"><button class="btn primary" type="submit">Save</button><button class="btn ghost" type="button" onclick="closeForm('appointment')">Cancel</button></div>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <table id="appointmentTable">
+            <thead><tr><th>Patient</th><th>Doctor</th><th>Date & Time</th><th>Reason</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Reports -->
+      <section id="reports" class="card" style="display:none">
+        <h2>Reports & Utilities</h2>
+        <p class="muted">Export / Import and simple stats</p>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn ghost" onclick="exportAllJSON()">Export All (JSON)</button>
+          <label class="btn ghost" style="padding:8px 10px;cursor:pointer"><input id="importFile" type="file" accept="application/json" style="display:none" onchange="importJSON(event)">Import JSON</label>
+          <button class="btn" onclick="printSummary()">Print Summary</button>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <h4>Quick stats</h4>
+          <ul>
+            <li>Total patients: <span id="r_patients">0</span></li>
+            <li>Total doctors: <span id="r_doctors">0</span></li>
+            <li>Upcoming appointments (7 days): <span id="r_next7">0</span></li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>Open this file in any modern browser. Data is stored locally in your browser (localStorage).</footer>
+
+<script>
+// Keys
+const KEYS = {PATIENTS:'hms_patients_v2', DOCTORS:'hms_doctors_v2', APPTS:'hms_appts_v2'}
+// Helpers
+const uid = (p='id')=> p + '_' + Math.random().toString(36).slice(2,9)
+const load = k=>{try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return []}}
+const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v))
+
+// Navigation
+function show(id){document.querySelectorAll('main section').forEach(s=>s.style.display='none');document.getElementById(id).style.display='';document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));document.getElementById('nav-'+id).classList.add('active');renderStats();}
+
+// Init
+function init(){renderPatients();renderDoctors();renderAppointments();renderStats();}
+
+// ---------- Patients ----------
+function renderPatients(){const tbody=document.querySelector('#patientTable tbody');tbody.innerHTML='';const q=document.getElementById('patientSearch')?document.getElementById('patientSearch').value.toLowerCase():'';const patients=load(KEYS.PATIENTS).filter(p=> (p.name||'').toLowerCase().includes(q) || (p.contact||'').toLowerCase().includes(q));
+  patients.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=<td>${escapeHtml(p.name)}</td><td>${p.age}</td><td>${p.gender}</td><td>${escapeHtml(p.contact||'')}</td><td>${escapeHtml(p.address||'')}</td><td class="actions"><button class="btn ghost" onclick="editPatient('${p.id}')">Edit</button><button class="btn" onclick="deletePatient('${p.id}')">Delete</button></td>;tbody.appendChild(tr)});
+  document.getElementById('patientCount').innerText=load(KEYS.PATIENTS).length
+}
+
+function openForm(kind){document.getElementById(kind+'Form').style.display='block';if(kind==='appointment') populateSelects();}
+function closeForm(kind){document.getElementById(kind+'Form').style.display='none';clearForm(kind)}
+function clearForm(kind){if(kind==='patient'){['patientId','patientName','patientAge','patientGender','patientContact','patientAddress','patientNotes'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=''})} if(kind==='doctor'){['doctorId','doctorName','doctorSpecialty','doctorContact'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=''})} if(kind==='appointment'){['appointmentId','appointmentDatetime','appointmentReason'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=''})}}
+
+function savePatient(e){e.preventDefault();const id=document.getElementById('patientId').value||uid('pat');const patients=load(KEYS.PATIENTS);const obj={id,name:document.getElementById('patientName').value.trim(),age:document.getElementById('patientAge').value,gender:document.getElementById('patientGender').value,contact:document.getElementById('patientContact').value.trim(),address:document.getElementById('patientAddress').value.trim(),notes:document.getElementById('patientNotes').value.trim()};const idx=patients.findIndex(p=>p.id===id);if(idx>-1){patients[idx]=obj}else{patients.push(obj)}save(KEYS.PATIENTS,patients);closeForm('patient');renderPatients();renderAppointments();renderStats();}
+
+function editPatient(id){const patients=load(KEYS.PATIENTS);const p=patients.find(x=>x.id===id);if(!p) return;openForm('patient');document.getElementById('patientId').value=p.id;document.getElementById('patientName').value=p.name;document.getElementById('patientAge').value=p.age;document.getElementById('patientGender').value=p.gender;document.getElementById('patientContact').value=p.contact;document.getElementById('patientAddress').value=p.address;document.getElementById('patientNotes').value=p.notes}
+
+function deletePatient(id){if(!confirm('Delete patient?')) return;let arr=load(KEYS.PATIENTS);arr=arr.filter(p=>p.id!==id);save(KEYS.PATIENTS,arr);renderPatients();renderAppointments();renderStats()}
+
+// ---------- Doctors ----------
+function renderDoctors(){const tbody=document.querySelector('#doctorTable tbody');tbody.innerHTML='';const doctors=load(KEYS.DOCTORS);doctors.forEach(d=>{const tr=document.createElement('tr');tr.innerHTML=<td>${escapeHtml(d.name)}</td><td>${escapeHtml(d.specialty)}</td><td>${escapeHtml(d.contact||'')}</td><td class="actions"><button class="btn ghost" onclick="editDoctor('${d.id}')">Edit</button><button class="btn" onclick="deleteDoctor('${d.id}')">Delete</button></td>;tbody.appendChild(tr)});}
+
+function saveDoctor(e){e.preventDefault();const id=document.getElementById('doctorId').value||uid('doc');const doctors=load(KEYS.DOCTORS);const obj={id,name:document.getElementById('doctorName').value.trim(),specialty:document.getElementById('doctorSpecialty').value.trim(),contact:document.getElementById('doctorContact').value.trim()};const idx=doctors.findIndex(d=>d.id===id);if(idx>-1){doctors[idx]=obj}else{doctors.push(obj)}save(KEYS.DOCTORS,doctors);closeForm('doctor');renderDoctors();populateSelects();renderStats();}
+
+function editDoctor(id){const doctors=load(KEYS.DOCTORS);const d=doctors.find(x=>x.id===id);if(!d) return;openForm('doctor');document.getElementById('doctorId').value=d.id;document.getElementById('doctorName').value=d.name;document.getElementById('doctorSpecialty').value=d.specialty;document.getElementById('doctorContact').value=d.contact}
+
+function deleteDoctor(id){if(!confirm('Delete doctor?')) return;let arr=load(KEYS.DOCTORS);arr=arr.filter(d=>d.id!==id);save(KEYS.DOCTORS,arr);renderDoctors();populateSelects();renderStats()}
+
+// ---------- Appointments ----------
+function renderAppointments(){const tbody=document.querySelector('#appointmentTable tbody');tbody.innerHTML='';const appts=load(KEYS.APPTS).sort((a,b)=> new Date(a.datetime)-new Date(b.datetime));const patients=load(KEYS.PATIENTS);const doctors=load(KEYS.DOCTORS);appts.forEach(a=>{const pat=patients.find(p=>p.id===a.patientId)||{};const doc=doctors.find(d=>d.id===a.doctorId)||{};const tr=document.createElement('tr');tr.innerHTML=<td>${escapeHtml(pat.name||'—')}</td><td>${escapeHtml(doc.name||'—')}</td><td>${new Date(a.datetime).toLocaleString()}</td><td>${escapeHtml(a.reason||'')}</td><td class="actions"><button class="btn ghost" onclick="editAppointment('${a.id}')">Edit</button><button class="btn" onclick="deleteAppointment('${a.id}')">Delete</button></td>;tbody.appendChild(tr)});}
+
+function populateSelects(){const psel=document.getElementById('appointmentPatient');const dsel=document.getElementById('appointmentDoctor');if(!psel || !dsel) return;psel.innerHTML='';dsel.innerHTML='';load(KEYS.PATIENTS).forEach(p=>psel.insertAdjacentHTML('beforeend',<option value="${p.id}">${escapeHtml(p.name)} — ${escapeHtml(p.contact||'')}</option>));load(KEYS.DOCTORS).forEach(d=>dsel.insertAdjacentHTML('beforeend',<option value="${d.id}">${escapeHtml(d.name)} — ${escapeHtml(d.specialty||'')}</option>));}
+
+function saveAppointment(e){e.preventDefault();const id=document.getElementById('appointmentId').value||uid('ap');const appts=load(KEYS.APPTS);const obj={id,patientId:document.getElementById('appointmentPatient').value,doctorId:document.getElementById('appointmentDoctor').value,datetime:document.getElementById('appointmentDatetime').value,reason:document.getElementById('appointmentReason').value.trim()};const idx=appts.findIndex(a=>a.id===id);if(idx>-1){appts[idx]=obj}else{appts.push(obj)}save(KEYS.APPTS,appts);closeForm('appointment');renderAppointments();renderStats();}
+
+function editAppointment(id){const appts=load(KEYS.APPTS);const a=appts.find(x=>x.id===id);if(!a) return;openForm('appointment');populateSelects();document.getElementById('appointmentId').value=a.id;document.getElementById('appointmentPatient').value=a.patientId;document.getElementById('appointmentDoctor').value=a.doctorId;document.getElementById('appointmentDatetime').value=a.datetime;document.getElementById('appointmentReason').value=a.reason}
+
+function deleteAppointment(id){if(!confirm('Delete appointment?')) return;let arr=load(KEYS.APPTS);arr=arr.filter(a=>a.id!==id);save(KEYS.APPTS,arr);renderAppointments();renderStats()}
+
+// ---------- Reports & Utilities ----------
+function renderStats(){document.getElementById('statPatients').innerText=load(KEYS.PATIENTS).length;document.getElementById('statDoctors').innerText=load(KEYS.DOCTORS).length;const upcoming=load(KEYS.APPTS).filter(a=> new Date(a.datetime) > new Date()).length;document.getElementById('statAppts').innerText=upcoming;document.getElementById('r_patients').innerText=load(KEYS.PATIENTS).length;document.getElementById('r_doctors').innerText=load(KEYS.DOCTORS).length;document.getElementById('r_next7').innerText=countNextDays(7)}
+
+function countNextDays(days){const now=Date.now();const end=now + days*24*60*60*1000;return load(KEYS.APPTS).filter(a=>{const t=new Date(a.datetime).getTime();return t>now && t<=end}).length}
+
+function exportPatientsCSV(){const patients=load(KEYS.PATIENTS);if(!patients.length){alert('No patients to export');return}const rows=[['id','name','age','gender','contact','address','notes'],...patients.map(p=>[p.id,p.name,p.age,p.gender,p.contact,p.address,p.notes])];const csv=rows.map(r=>r.map(c=>"${String(c||'').replace(/"/g,'""')}").join(',')).join('\n');downloadFile(csv,'patients.csv','text/csv')}
+
+function exportAllJSON(){const data={patients:load(KEYS.PATIENTS),doctors:load(KEYS.DOCTORS),appointments:load(KEYS.APPTS)};const blob=JSON.stringify(data,null,2);downloadFile(blob,'hms_backup.json','application/json')}
+
+function importJSON(e){const f=e.target.files[0];if(!f) return;const reader=new FileReader();reader.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(data.patients) save(KEYS.PATIENTS,data.patients); if(data.doctors) save(KEYS.DOCTORS,data.doctors); if(data.appointments) save(KEYS.APPTS,data.appointments); init(); alert('Import complete')}catch(err){alert('Invalid JSON file')}};reader.readAsText(f)}
+
+function downloadFile(content,filename,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
+
+function printSummary(){const patients=load(KEYS.PATIENTS).length;const doctors=load(KEYS.DOCTORS).length;const soon=countNextDays(7);const w=window.open('','_blank');w.document.write(<h3>Hospital Summary</h3><p>Total patients: ${patients}</p><p>Total doctors: ${doctors}</p><p>Upcoming (7 days): ${soon}</p>);w.print();w.close()}
+
+// ---------- Helpers ----------
+function clearAll(){if(!confirm('Clear all stored data? This cannot be undone.')) return;localStorage.removeItem(KEYS.PATIENTS);localStorage.removeItem(KEYS.DOCTORS);localStorage.removeItem(KEYS.APPTS);init();alert('Cleared')}
+
+function loadSample(){const p1={id:uid('pat'),name:'Asha Kumar',age:28,gender:'Female',contact:'9876543210',address:'Mumbai',notes:'Diabetic'};const p2={id:uid('pat'),name:'Rohit Verma',age:34,gender:'Male',contact:'9123456789',address:'Delhi',notes:''};const d1={id:uid('doc'),name:'Dr. Neha Singh',specialty:'Cardiology',contact:'9000011111'};const d2={id:uid('doc'),name:'Dr. Amit Rao',specialty:'General',contact:'9000022222'};const a1={id:uid('ap'),patientId:p1.id,doctorId:d1.id,datetime:new Date(Date.now()+86400000).toISOString().slice(0,16),reason:'Follow-up'};const a2={id:uid('ap'),patientId:p2.id,doctorId:d2.id,datetime:new Date(Date.now()+172800000).toISOString().slice(0,16),reason:'Fever'};save(KEYS.PATIENTS,[p1,p2]);save(KEYS.DOCTORS,[d1,d2]);save(KEYS.APPTS,[a1,a2]);init();alert('Sample data loaded')}
+
+function escapeHtml(str){if(!str) return '';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// Init render
+init();
+</script>
+</body>
+</html>
